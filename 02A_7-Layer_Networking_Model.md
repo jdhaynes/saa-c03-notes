@@ -28,6 +28,7 @@ Layers 1 - 3 are the **media layers**. This concerns how data is moved from poin
 
 ## Layer 2 - Data Link
 * Requires function layer 1 - runs over L1.
+* Ethernet is a L2 technology.
 * Concerned with delivery of data in the form of **frames** and introduces **MAC addresses**.
 * L2 introduces:
     * Identifiable devices.
@@ -35,7 +36,6 @@ Layers 1 - 3 are the **media layers**. This concerns how data is moved from poin
     * Collision detects.
     * Unicast (1:1).
     * Multicast (1:n).
-    * Switches (hubs with specific routing).
 
 ### Frames
 A frame is the container of data for transmission in L2. It is comprised of:
@@ -52,7 +52,53 @@ A frame is the container of data for transmission in L2. It is comprised of:
 * In race condition where both transmit at same time, both wait for a specified time plus a random interval.
 
 ### L2 Device Example - Switch
-* Smarter than hubs (L1 device) as it has routing capacity due to presence of MAC addresses introduced by L2.
+* Smarter than hubs (L1 device) as it has due to presence of MAC addresses introduced by L2.
 * Maintains MAC address table - list of which MAC address is connected to each port. Learns this the first time a device sents a frame, as it contains sender MAC address.
+* Only sends frame to the port the destination device is connected to - doesn't repeat like hubs.
 * If the destination MAC address isn't yet in the MAC address table, it will sent it to all ports.
 * Won't forward collisions to other ports. 
+
+## Layer 3 - Network
+* Concerned with moving frames from one device spanning multiple L2 networks - i.e. routing.
+* L2 enables devices within the same network to communicate as they use the same protocol, but different networks may use different L2 protocols - e.g. LANs usually use ethernet, but long range connections may use PPP, MPLS, ATM. Therefore another abstraction is required.
+* L3 therefore spans multiple L2 networks.
+* Internet protocol (IP) is an L3 protocol - adds IP addresses that enable routing across networks.
+* Routers (L3 devices) move packets between networks by encapsulating **packets** in frames. The packet mostly doesn't change (some exceptions), but the frame that encapsulates it may change as it moves between different networks as it is stripped out and rebuilt.
+
+### Packets (IPv4)
+Content of IPv4 packet:
+* Source IP address.
+* Destination IP address.
+* Protocol - specifies which L4 protocol was used to generate the L3 data (e.g. TCP, UDP, ICMP).
+* Time to live (TTL) - maximum number of hops before being discarded. Stops packet from constantly being looped.
+* Data.
+
+### Packets (IPv6)
+Content of IPv6 packet:
+* Source IP address (larger size - more possible addresses).
+* Destination IP address (larger size - more possible addresses).
+* Hop limit - same as TTL.
+* Data.
+
+### IP Addressing (IPv4)
+* IP addresses are represented in decimal-dotted notation - 4 blocks of number from 0-255. In memory, this is represented in binary as 4 sets of 8 bits (32 bits total). Each block is known as an octet (8 bits).
+* Two parts of IP address:
+    * Network - first two octets (16 bits).
+    * Host - last two octets (16 bits).
+* If network part of two IP addresses are the same, they are on the same IP network and therefore local.
+* IP addresses are assigned either statically or dynamically (DHCP).
+* IP addresses must be unique globally.
+
+### Subnet Masks
+* Allows a host to determine if an IP address it wants to communicate with is on the local network or not. If local, then the host can communicate directly. If not local, the the device must communicate with a **gateway** and therefore undergo IP routing through different intermediate networks.
+* Works by determining which part of the IP address represents the network (e.g. first two octets).
+
+### Example (225.225.0.0)
+* Decimal dotted notation: 255.255.0.0 
+* Binary: 11111111 11111111 00000000 00000000
+* Prefix: /16 (means 16x 1s at the beginning of the binary sequence)
+
+1s indicate which part is the network part of the addressand 0s indicate the host part. Therefore, 225.225.0.0 means the first two octets are the network part.
+
+### Route Tables & Routes
+
