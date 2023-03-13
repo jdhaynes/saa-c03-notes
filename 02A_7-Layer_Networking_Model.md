@@ -65,6 +65,16 @@ A frame is the container of data for transmission in L2. It is comprised of:
 * Internet protocol (IP) is an L3 protocol - adds IP addresses that enable routing across networks.
 * Routers (L3 devices) move packets between networks by encapsulating **packets** in frames. The packet mostly doesn't change (some exceptions), but the frame that encapsulates it may change as it moves between different networks as it is stripped out and rebuilt.
 
+L3 provides:
+* Device-to-device communication over many L2 networks
+* Cross-networking addressing - e.g. via IPv4, IPv6
+* ARP - translate IP to MAC address
+* Routing of encapsulated L2 packets via route tables
+ 
+L3 doesn't provide:
+* Multiple channels of communication (e.g. multiple applications) between source and destination. Packets are only sent over one channel.
+* Guarantee that packets are delivered in the order.
+
 ### Packets (IPv4)
 Content of IPv4 packet:
 * Source IP address.
@@ -93,12 +103,19 @@ Content of IPv6 packet:
 * Allows a host to determine if an IP address it wants to communicate with is on the local network or not. If local, then the host can communicate directly. If not local, the the device must communicate with a **gateway** and therefore undergo IP routing through different intermediate networks.
 * Works by determining which part of the IP address represents the network (e.g. first two octets).
 
-### Example (225.225.0.0)
+#### Example (225.225.0.0)
 * Decimal dotted notation: 255.255.0.0 
 * Binary: 11111111 11111111 00000000 00000000
-* Prefix: /16 (means 16x 1s at the beginning of the binary sequence)
+* Prefix: /16 (means the left 16 bits are 1)
 
 1s indicate which part is the network part of the addressand 0s indicate the host part. Therefore, 225.225.0.0 means the first two octets are the network part.
 
 ### Route Tables & Routes
+* Route tables match a destination IP address to the most optimal next hop machine. 
+* Route tables are found on routers and devices and enable packets to hop through different networks in the optimal route until the destination is reached.
+* Route table entries with the highest specifity (higher prefix numbers) are preferred.
 
+## Address Resolution Protocol (ARP)
+* ARP translates an IP address of a machine into a MAC address.
+* When a packet reaches the destination network, ARP is used to find the MAC address for destination IP which is then sent through L2 to the destination MAC.
+* ARP works in a broadcasting manner - the enquiring devices broadcasts to the network "who has this MAC address?" and the corresponding machine responds back with their IP address.
