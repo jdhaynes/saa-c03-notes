@@ -10,7 +10,7 @@ Conceptual way of describing networking as 7 seperate layers from physical to ap
 * Layer 2 - Data Link
 * Layer 1 - Physical
 
-Layers 1 - 3 are the **media layers**. This concerns how data is moved from point A to point B across networks. Layers 4-7 are the **host layers** and concern how data is represented, processed and understable to both the sender and receiver.
+Layers 1 - 3 are the **media layers**. This concerns how data is moved from point A to point B across networks. Layers 4-7 are the **host layers** and concern how data is represented, processed and understable to both the sender and receiver. As OSI model is conceptual, in implementation there is usually overlap between the layers.
 
 ## Layer 1 - Physical
 * L1 specifications define how **raw bit streams** are transmitted and received on a shared physical medium. Properties include things like timing, voltage levels and rates.
@@ -119,3 +119,30 @@ Content of IPv6 packet:
 * ARP translates an IP address of a machine into a MAC address.
 * When a packet reaches the destination network, ARP is used to find the MAC address for destination IP which is then sent through L2 to the destination MAC.
 * ARP works in a broadcasting manner - the enquiring devices broadcasts to the network "who has this MAC address?" and the corresponding machine responds back with their IP address.
+
+## Problems with L3
+Each packet is treated independantly, therefore:
+* L3 doesn't guarantee delivery of packets in order - different packets may take different routs and arrive out of order.
+* Packets can go missing due to intermitant network conditions causing packets to be stuck in routing loops, then discarded due to TTL. This is quite common!
+* No seperate communication channels (i.e. for different applications) - packets are sent only via a single channel.
+* No flow control - if source transmits packets faster than destination can receive, packets may be lost.
+
+## Layer 4 (Transport) and Layer 5 (Session)
+* Usually some overlap between L4 and L5 - notes below cover both together.
+* TCP and UDP are examples of L4 protocols that run on top of L3. Both run on top of IP (L3).
+
+### Transmission Control Protocol (TCP)
+* Used when reliability, error correction and ordering of data is desired. 
+* Used for most important use cases - e.g. in HTTP, HTTPS, SSH.
+* Connection-orientated protocol - sets up bi-directional channel between two devices.
+
+#### TCP Segments
+Segments are the fundamental data transfer unit for TCP. They are encapsulated in L3 packets and do not contain IP addresses (these are L3 concepts), but instead are routed via ports which are individual channels for transmission.
+
+Segments contain:
+* Source port number
+* Destination port number
+* Sequence number - i
+
+### User Datagram Protocol (UDP)
+Faster than TCP, but less reliable as it doesn't have overheads in guaranteeing reliable data delivery. Used when performance is more important than reliability.
