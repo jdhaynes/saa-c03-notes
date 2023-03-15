@@ -134,15 +134,23 @@ Each packet is treated independantly, therefore:
 ### Transmission Control Protocol (TCP)
 * Used when reliability, error correction and ordering of data is desired. 
 * Used for most important use cases - e.g. in HTTP, HTTPS, SSH.
-* Connection-orientated protocol - sets up bi-directional channel between two devices.
+* Connection-orientated protocol - sets up a reliable bi-directional channel between two devices.
 
 #### TCP Segments
 Segments are the fundamental data transfer unit for TCP. They are encapsulated in L3 packets and do not contain IP addresses (these are L3 concepts), but instead are routed via ports which are individual channels for transmission.
 
-Segments contain:
+The **TCP header** contains the following fields:
 * Source port number
 * Destination port number
-* Sequence number - i
+* Sequence number - incremented each time new segment sent. Acts as ID, can be used for re-transmission if required for error correction. Enables correct ordering at recipient.
+* Acknowledgement - used to acknowledge that a segment has been received by recipient.
+* Flags and extra fields used for the machinary of running TCP and influences the connection.
+* Window - enables flow control. Window specfifies the number of bytes that the recipient would like to receive before the sender must pause and wait for all that data to be acknowledged. Allows receiver to control rate of transmission from sender.
+* Checksum - for error checking.
+* Urgent pointer - indicates that a segment should be processed as a priority before normal data. Useful for time sensitive applications (e.g. FTP).
+
+#### Mechanism of Communication
+When a channel is established between client and server, a temporary short-lived port is created and used on the client (the **ephermeral port**). As it is bi-directional, the client and server ports are reversed on the other machine.
 
 ### User Datagram Protocol (UDP)
 Faster than TCP, but less reliable as it doesn't have overheads in guaranteeing reliable data delivery. Used when performance is more important than reliability.
