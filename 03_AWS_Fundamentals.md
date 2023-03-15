@@ -73,7 +73,18 @@ EC2 instances have a **state** that indicates the status of the instance in the 
 | Networking | Billable |  |  |
 
 ### Amazon Machine Images (AMIs)
-AMIs are snapshots of an operating system that can be used to launch new EC2 instances. AMIs can also be created from existing EC2 instances. AMIs have permissions on who can use it (e.g. public, or explicit access of specific users).
+AMIs are snapshots of an operating system that can be used to launch new EC2 instances. AMIs can also be created from existing EC2 instances.
+
+AMIs have the following permission options:
+* Public 
+* Owner only
+* Specific AWS accounts
+
+The following is stored in an AMI:
+* Boot volume
+* Block device mapping
+* AMI permissions
+* Data volumes
 
 ## AWS Simple Storage Service (S3)
 S3 is a global object storage platform.
@@ -160,5 +171,73 @@ Resources:
       KeyName: !Ref Keyname
 ```
 
+## AWS CloudWatch
+CloudWatch is an AWS product that enables collecting and monitoring of operational data. There are three types of data that CloudWatch can manage:
+* Metrics - data concerning the performance of systems.
+* Logs - data concerning logging data.
+* Events - data concerning system events that can be used to trigger certain actions.
 
+### Metrics
+Metrics are timestamped data concerning the performance of AWS products, apps or on-prem systems. 
+* Examples - CPU load and memory usage of EC2 instances. 
+* Many metrics are setup by default on AWS products, but custom metrics can be collected by submitting them through an installed CloudWatch agent.
+* A metric doesn't refer to a specific instance/resource, but a collection of data of the same metric from all relevant resources.
 
+#### Namespaces
+Namespaces is a an isolated container that is used to seperate metric data into different areas. For example, the `aws/ec2` AWS namespace contains metrics from EC2 instances. Custom namespaces can be created.
+
+#### Dimensions
+Dimensions are additional data added to a specific metric data point that allow datapoints to be viewed in a different perspective. Example - the instance ID for EC2 instances will allow metrics to be viewed for different instances.
+
+#### Alarams
+Alarms can be set to trigger certain actions (e.g. send notification through SNS) when a certain metric value is reached (e.g. CPU usage > 25%).
+
+## Shared Responsibility Model
+AWS are responsible for the security **'of'** the cloud:
+* Regions, AZs, edge locations
+* Hardware and global infrastructure
+* Compute, storage, databases and networking
+
+The customer is responsible for the security **'in'** the cloud:
+* Data encryption, integrity and authentication
+* Network traffic protection
+* OS, network and firewall configuration
+* Access management
+* Customer data
+
+## High Availability, Fault Tolerance and Disaster Recovery
+### High Availability (HA)
+* HA ensures that an agreed level of operational performance is maintained (e.g. server uptime) for a higher than normal period.
+* HA does allow outages, but tries to minimise the negative impacts of them as much as possible - e.g. reducing downtime by as much as possible.
+* HA can be achieved by spare infrastructure with switchover in case of failure. This may introduce a short disruption - e.g. users need to log back in.
+
+### Fault Tolerance (FT)
+* FT doesn't allow for outages and ensures that systems are able to continue operating through faults.
+* Used for mission-critical systems thatg cannot tolerate any downtime.
+* Much more complex and expensive to achieve than HA as it requires multiple levels of redundancy.
+
+### Disaster Recovery (DR)
+DR is a set of tools, policies and procedures to enable recovery and continuation of systems following a disaster (natural or human-induced) when HA and FT do not work. It can be achieved by:
+* Pre-planning to ensure plans are in place to replace hardware and storing backups at another location.
+* Maintaining copies of procedures and logins/credentials to streamline procedure when disaster happens.
+
+## AWS Route 53 (R53)
+* Managed DNS service that provides registration of domains and hosting DNS zones on nameservers.
+* Global service and globally resilient.
+* Zones (called **hosted zones** in AWS terminology) are hosted and replicated across 4 managed nameservers.
+* Host zones can either be public or private (in VPCs)
+
+### Types of Zone Records
+* **A**: points a hostname (e.g. www) to an IPv4 address.
+* **AAAA**: points a hostname (e.g. www) to an IPv6 address.
+* **NS**: delegates to another nameserver.
+* **MX**: points to a mail server.
+    * Has a priorty value - lower values have higher priority.
+    * If the record value has a dot at the end, it is a fully qualified domain name and may be external to the zone. If it doesn't have a dot, it is a host within the same zone.
+* **TXT**: adds textual data to the domain. Usually used to prove domain ownership.
+
+### Time to Live (TTL)
+TTL specifies the time that a DNS zone should be cached at a resolver service so it can provide a quicker non-authoritative response. Once TTL expires, the resolver gets a fresh authoritiative answer and caches it again until TTL expires.
+
+Low TTL = slower as more queries to the authoritative NS, but more flexibile incase changes are made.
+High TTL = quicker as less queries to the authoritative NS, but can be problematic if zone changes are made as the "incorrect" non-authoritative answer is persisted for loner.
