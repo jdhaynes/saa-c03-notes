@@ -53,15 +53,14 @@ Two types:
     * Can have **many** per region. 
     * Completely configurable.
 
-
-## Elastic Cloud Compute (EC2)
+## AWS Elastic Cloud Compute (EC2)
 EC2 provides virtual machine instances as infrastructure-as-a-service (IAAS). 
 * Use VPC networking and are private by default, but can be exposed to public. 
 * AZ resilient - any given EC2 instance is associated with one AZ.
 * Come in may sizes with different hardware allocations.
 * Billed on demand (by second or hour). 
 * Storage either provided by local on-host storage, or Elastic Block Store (EBS)
-* A **key pair** must be created and downloaded locally to be able to connect to an EC2 instance via SSH.
+* A **key pair** must be created and downloaded locally to be able to connect to an EC2 instance via SSH with `ssh -i key.pem user@server`.
 
 ### Instance Lifecycle
 EC2 instances have a **state** that indicates the status of the instance in the lifecycle (e.g. running, stopped or terminated). The state determines what the customer is billed for.
@@ -75,3 +74,91 @@ EC2 instances have a **state** that indicates the status of the instance in the 
 
 ### Amazon Machine Images (AMIs)
 AMIs are snapshots of an operating system that can be used to launch new EC2 instances. AMIs can also be created from existing EC2 instances. AMIs have permissions on who can use it (e.g. public, or explicit access of specific users).
+
+## AWS Simple Storage Service (S3)
+S3 is a global object storage platform.
+* Public service - runs in public zone.
+* Regionally resilient - data is replicated across multiple AZs within a region.
+* S3 data stored in a specific region and doesn't leave unless configured to replicate across regions.
+* Unlimited data amounts and allows multi-user usage.
+* Good for storing large amounts of data.
+* Highly scalable in terms of data amount and number of users.
+
+### Structure
+* **Objects** are files that are stored in S3. They are stored in **buckets**, which are containers for objects.
+* Objects are stored flat - i.e. all objects are stored at the root level unlike a traditional filesystem that has directories.
+*  Filenames can have prefixes that are presented by S3 as folders, but are still actually stored flat. (e.g. /folder1/file.png).
+
+### Objects
+Has the following components:
+* Key: the filename/ID.
+* Value: the binary content of the object. Can be 0 bytes to 5TB.
+* Other:
+    * Version ID
+    * Metadata
+    * Access control
+    * Sub resources
+
+### Buckets
+* Created in a specific AWS region and are region resilient.
+* Data has primary home region and will not be replicated to other regions unless configured.
+* Bucket name must be globally unique as S3 sits in the global namespace.
+* Buckets will present object name prefixes as folders, despite being stored in flat structure. 
+* Buckets are private by default - nobody has permissions to bucket except for creator account root user.
+* Unblocking public access doesn't mean that the public can now access the bucket - it just means that now you are allowed to grant public access permissions. It acts as a failsafe check against accidentally granting public permissions.
+
+## AWS CloudFormation
+CloudFormation is an infrastructure as code (IAC) product used to provision and update AWS resources in a repeatable, consistent way. It uses **templates** to define the AWS resources required, and applying the template will cause AWS to automatically create, update and delete AWS resources to match the template. Templates can either be in YAML or JSON. Below shows the structure of a YAML template.
+
+```yaml
+# Optional - allows extension of standards over time. If omitted, this is assumed.
+# If both AWSTemplateFormatVersion and Description are used, Description MUST ALWAYS immediately follow AWSTemplateFormatVersion.
+AWSTemplateFormatVersion: "version date"
+
+# Optional - used to give information to users of the template.
+Description:
+  A sample template
+
+# Optional - many functions, incl. how the UI presents the template data.
+Metadata:
+  template metadata
+
+# Optional - defines fields that prompt the user for information. Examples - sizes of instances, how many AZs to use etc.
+Parameters:
+  set of parameters
+
+# Optional - defines key-value pairs that can be used as lookup tables.
+Mappings:
+  set of mappings
+
+# Optional - used to create conditions that are used to control provisioning.
+Conditions:
+  set of conditions
+
+Transform:
+  set of transforms
+
+# The only mandatory section. Defines AWS resources to provision.
+Resources:
+  set of resources
+
+# Optional - used tor return data to user after template has finished applying. E.g. returning IDs of resources, passwords.
+Outputs:
+  set of outputs
+```
+
+A template defines a set of **logical resources** which are the theoretical resources that should exist. A template is used to create a **stack**, which is a physical representation of the template containing working **physical resources**. When applying a template, CloudFormation ensures that logical resources and corresponding physical resources are kept in sync via create, update and delete operations.
+
+Below shows an example of a logical resource defined in a template:
+```yaml
+Resources:
+  Instance: # This defines a logical resource
+    Type: 'AWS::EC2::Instance' # Defines what type of AWS service this resource should be
+    Properties: # Configures the resource
+      ImageId: !Ref LatestAmiId
+      Instance Type: !Ref Instance Type
+      KeyName: !Ref Keyname
+```
+
+
+
