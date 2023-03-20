@@ -9,3 +9,4 @@ This repository contains my personal study notes for the AWS Solutions Architect
 | 02B | [Networking](/02B_Networking.md) |
 | 02C | [Domain Name Service (DNS)](/02C_DNS.md) | 
 | 03 | [AWS Fundamentals](/03_AWS_Fundamentals.md) |
+| 04 | [IAM, Accounts and AWS Organisations](/04_IAM_Accounts_Organisations.md) |
