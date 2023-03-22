@@ -97,3 +97,67 @@ It is best practice to create a single account used for login, and then allow th
 When creating a new account **directly** in the account, AWS creates an admin role called `OrganizationAccountAccessRole` that trusts the management account. This enables the management account to role switch into the new account without logging into it directly.
 
 When attaching existing accounts, the `OrganizationAccountAccessRole` must be created manually in the attached account by giving it admin permissions. Note - it doesn't need to be named this, but is the convention.
+
+### Service Control Policies (SCPs)
+SCPs are a way to controlling what an account can and can't do - e.g. provisioning certain resources. SCPs are specified in a JSON policy which can be attached to either:
+* The root container - applies to whole organisation
+* An organisational unit (OU) - applies to all accounts within the OU
+* An individual member account
+
+SCPs **cannot restrict the management account**, so it is best practice to keep the management account as clean as possible and not use it to provision resources.
+
+SCPs limit what all identities inside an account can do. This includes the root, although it doesn't do this directly as nothing can restrict the root - rather SCPs restrict what an account can do, which indirectly affects what the root can do at full permissions.
+
+As SCP has a default implict deny for everything, the default action by AWS when enabling SCP is to add a `FullAWSAccess` SCP that enables everything (i.e. same effect as having SCP disabled):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+  }
+}
+```
+
+There are two approaches to implementing SCP:
+* Deny lists
+* Allow lists
+
+#### Deny Lists
+Deny lists work build on top of the default `FullAWSAccess` SCP by denying specific services - all other ones are allowed. For example, the following SCP added in addition to default `FullAWSAccess` SCP will allow access to all operations but S3.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Deny",
+    "Action": "s3:*",
+    "Resource": "*"
+  }
+}
+```
+
+Deny lists are useful as you don't need to change the SCPs when new services are added - less admin overhead.
+
+#### Allow Lists
+Allow lists only explicitly allow services specified in the SCP. This requires the `FullAWSAccess` SCP to be removed first so that everything is explicitly denied, then the new SCP to be added that allows only the services required.
+
+This SCP allows only S3 and EC2:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+        "Effect": "Allow",
+        "Action": [
+            "s3:*",
+            "ec2:*"
+        ],
+    "Resource": "*"
+    }
+  ]
+}
+```
